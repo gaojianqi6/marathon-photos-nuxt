@@ -4,12 +4,10 @@
       <div class="flex items-center justify-between h-20">
         <!-- Logo -->
         <NuxtLink to="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity group">
-          <div class="w-12 h-12 bg-gradient-to-br from-blue-600 via-blue-700 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:shadow-blue-500/50 transition-shadow">
-            <span class="text-white font-bold text-xl">MP</span>
+          <div class="rounded-lg px-3 py-2 backdrop-blur-sm" style="background-color: rgba(0, 215, 207, 0.5);">
+            <img src="/img/logo.svg" alt="Marathon Photos Live" class="h-8 w-auto">
           </div>
-          <span class="font-bold text-2xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Marathon Photos
-          </span>
+          <span class="sr-only">Marathon Photos Live</span>
         </NuxtLink>
 
         <!-- Navigation -->
