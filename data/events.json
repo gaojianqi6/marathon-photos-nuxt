@@ -1,0 +1,213 @@
+{
+  "status": "ok",
+  "result": [
+      {
+          "country": "SE",
+          "live": 0,
+          "display_name": {
+              "sv": "Sandsjöbacka Trail"
+          },
+          "event": "Sports/2026/Sandsjobacka Trail",
+          "eventid": "11011",
+          "date": "2026-01-17"
+      },
+      {
+          "country": "US",
+          "live": 0,
+          "display_name": {
+              "en": "Resolution Run 5K and 1 Mile Fun Run"
+          },
+          "event": "Sports/MPUS/2026/Resolution Run 5K",
+          "eventid": "10875",
+          "date": "2026-01-17"
+      },
+      {
+          "country": "AU",
+          "live": 1,
+          "display_name": {
+              "en": "Cadbury Marathon"
+          },
+          "event": "Sports/JRAU/2026/Cadbury Marathon",
+          "eventid": "10914",
+          "date": "2026-01-11"
+      },
+      {
+          "country": "SE",
+          "live": 1,
+          "display_name": {
+              "en": "Stadium Marathon"
+          },
+          "event": "Sports/2026/Stadion Marathon",
+          "eventid": "10939",
+          "date": "2026-01-10"
+      },
+      {
+          "country": "US",
+          "live": 1,
+          "display_name": {
+              "en": "IQ Fiber Winter Beach Run"
+          },
+          "event": "Sports/MPUS/2026/Winter Beach Run",
+          "eventid": "10874",
+          "date": "2026-01-10"
+      },
+      {
+          "country": "SE",
+          "live": 1,
+          "display_name": {
+              "xx_0": "Borenshill Backyard Ultra",
+              "en": "Borensberg Backyard Ultra"
+          },
+          "event": "Sports/2026/Borensberg Backyard Ultra",
+          "eventid": "10928",
+          "date": "2026-01-03"
+      },
+      {
+          "country": "NO",
+          "live": 1,
+          "display_name": {
+              "xx_0": "Mørketidsløpet",
+              "xx_3": "Mørketidsmila",
+              "xx_4": "Mørketidstrimmen",
+              "xx_1": "Ishavskraft Marathon",
+              "xx_2": "PolarNight Half Marathon"
+          },
+          "event": "Sports/2026/Polar Night Marathon",
+          "eventid": "10848",
+          "date": "2026-01-03"
+      },
+      {
+          "country": "US",
+          "live": 1,
+          "display_name": {
+              "en": "Bank of America New Year’s Eve Run"
+          },
+          "event": "Sports/MPUS/2025/New Years Eve Run",
+          "eventid": "10873",
+          "date": "2025-12-31"
+      },
+      {
+          "country": "AE",
+          "live": 1,
+          "display_name": {
+              "en": "Bike Abu Dhabi Gran Fondo"
+          },
+          "event": "Sports/CPUK/2025/Bike Abu Dhabi Gran Fondo",
+          "eventid": "10904",
+          "date": "2025-12-21"
+      },
+      {
+          "country": "NL",
+          "live": 1,
+          "display_name": {
+              "nl": "DSW Bruggenloop Rotterdam",
+              "en": "DSW Bruggenloop Rotterdam",
+              "de": "DSW Bruggenloop Rotterdam"
+          },
+          "event": "Sports/NFNL/2025/Bruggenloop Rotterdam",
+          "eventid": "10896",
+          "date": "2025-12-14"
+      },
+      {
+          "country": "NZ",
+          "live": 1,
+          "display_name": {
+              "en": "Fine Signs Crazyman"
+          },
+          "event": "Sports/2025/Crazyman",
+          "eventid": "10847",
+          "date": "2025-12-14"
+      },
+      {
+          "country": "US",
+          "live": 1,
+          "display_name": {
+              "en": "BMW Dallas Marathon, Full, Half, Ultra and Relay"
+          },
+          "event": "Sports/MPUS/2025/Dallas Marathon Half Ultra and Relay",
+          "eventid": "10657",
+          "date": "2025-12-14"
+      },
+      {
+          "country": "US",
+          "live": 1,
+          "display_name": {
+              "xx_0": "Ameris Bank Jacksonville Marathon, Half Marathon & 5K",
+              "en": "Ameris Bank Jacksonville Marathon"
+          },
+          "event": "Sports/MPUS/2025/Jacksonville Marathon",
+          "eventid": "10872",
+          "date": "2025-12-13"
+      },
+      {
+          "country": "AE",
+          "live": 1,
+          "display_name": {
+              "en": "ADNOC Abu Dhabi Marathon"
+          },
+          "event": "Sports/CPUK/2025/Abu Dhabi Marathon",
+          "eventid": "10679",
+          "date": "2025-12-13"
+      },
+      {
+          "country": "US",
+          "live": 1,
+          "display_name": {
+              "en": "BMW Dallas Marathon 10K, 5K and Kids Races"
+          },
+          "event": "Sports/MPUS/2025/Dallas 10K 5K and Kids Races",
+          "eventid": "10656",
+          "date": "2025-12-13"
+      },
+      {
+          "country": "NZ",
+          "live": 1,
+          "display_name": {
+              "en": "Valley Ultra"
+          },
+          "event": "Sports/2025/Valley Ultra",
+          "eventid": "10489",
+          "date": "2025-12-13"
+      },
+      {
+          "country": "US",
+          "live": 1,
+          "display_name": {
+              "en": "BMW Dallas Marathon - Friday Night Lights Mile"
+          },
+          "event": "Sports/MPUS/2025/Friday Night Lights Mile",
+          "eventid": "10902",
+          "date": "2025-12-12"
+      },
+      {
+          "country": "GB",
+          "live": 1,
+          "display_name": {
+              "en": "Running Industry Awards"
+          },
+          "event": "Sports/CPUK/2025/Running Industry Awards",
+          "eventid": "10863",
+          "date": "2025-12-09"
+      },
+      {
+          "country": "KY",
+          "live": 1,
+          "display_name": {
+              "en": "Cayman Islands Marathon"
+          },
+          "event": "Sports/PKUS/2025/Cayman Islands Marathon",
+          "eventid": "10903",
+          "date": "2025-12-07"
+      },
+      {
+          "country": "GB",
+          "live": 1,
+          "display_name": {
+              "en": "Leeds Santa Dash"
+          },
+          "event": "Sports/CPUK/2025/Leeds Santa Dash",
+          "eventid": "10888",
+          "date": "2025-12-07"
+      }
+  ]
+}

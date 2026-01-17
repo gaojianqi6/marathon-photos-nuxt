@@ -39,7 +39,6 @@ Use status to judge the request status. ok and error, or other status.
   ```JSON
   {"status": "error", "reason": "Exception: Please enter part of event name. handling search"}
   ```
-1. Get the athletes photos from bib number: https://api.marathon-photos.com/website_api/v7/details?event=Sports/2025/Athens%20Marathon%20The%20Authentic&bib=1234 , the example data can be read by: data/photos.json
 
 #### Techstacks
 We need using nuxt.js, because we need handle the API CORS and SSR, we will using vue 3, and nuxt ui also.
@@ -96,6 +95,8 @@ https://marathonphotos.live/img/Events.a01b4893.svg
 Over 8 Thousand Events
 
 Event/Competition Page:
+Get the athletes photos from bib number: https://api.marathon-photos.com/website_api/v7/details?event=Sports/2025/Athens%20Marathon%20The%20Authentic&bib=1234 , the example data can be read by: data/photos.json
+
 Title: Date, location, Event name
 Search Area: by bib number, by upload photos
 
@@ -121,6 +122,18 @@ Video
 
 Certificate Tab: One Certificate page can download, preview, and open a pop up to show the big picture.
 Previous Year:frontend_settings.related_events
+
+Recent Events Page:
+Recent Events.
+
+Marathon Photos Live is the world's leading mass participation event sports photography company operating since 1999, now in 70 countries
+
+API: https://api.marathon-photos.com/website_api/v7/search?group=Sports&limit=20&upcoming=0
+API data example: data/events.json
+Event image: https://d2ewvgihbopi1g.cloudfront.net/photos/{event}/logo.gif
+We show the events group by the date, all the event on one date show together. and order date from bigger to smaller.
+show the display_name.en first, if no en attrs, we find what exists in display_name and show it
+and we need show the country icon.
 
 
 Event Organisers:
