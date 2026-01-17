@@ -1,0 +1,31 @@
+{
+  "nav": {
+    "home": "首页",
+    "cart": "购物车",
+    "contact": "联系",
+    "recentEvents": "最近活动"
+  },
+  "hero": {
+    "title": "找到您的",
+    "highlight": "活动照片",
+    "subtitle": "搜索您的活动，找到并购买来自世界级体育摄影的照片"
+  },
+  "search": {
+    "placeholder": "搜索活动名称...",
+    "noResults": "未找到活动。请尝试其他搜索词。",
+    "error": "搜索活动失败。请重试。"
+  },
+  "event": {
+    "viewEvent": "查看活动",
+    "country": "国家",
+    "date": "日期"
+  },
+  "badge": {
+    "title": "与我们一起让您的活动现场直播！",
+    "subtitle": "Marathon Photos Live 是活动体育摄影领域的全球领先者。",
+    "countries": "在70个国家运营",
+    "images": "超过2亿张图片",
+    "athletes": "超过3000万运动员",
+    "events": "超过8000场活动"
+  }
+}

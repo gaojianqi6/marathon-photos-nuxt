@@ -9,10 +9,10 @@
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
       <div class="text-center mb-16">
         <h2 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-          Get your event <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">LIVE</span> with us!
+          {{ $t('badge.title') }}
         </h2>
         <p class="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-          Marathon Photos Live is world leading in event sports photography.
+          {{ $t('badge.subtitle') }}
         </p>
       </div>
 
@@ -40,34 +40,36 @@
 </template>
 
 <script setup lang="ts">
-const badges = [
+const { t } = useI18n()
+
+const badges = computed(() => [
   {
     id: 1,
     icon: 'https://marathonphotos.live/img/globe.4d188807.svg',
     number: '70',
     suffix: '',
-    title: 'Operating in 70 Countries'
+    title: t('badge.countries')
   },
   {
     id: 2,
     icon: 'https://marathonphotos.live/img/camera.c6816ed2.svg',
     number: '200',
     suffix: 'M',
-    title: 'Over 200 Million Images'
+    title: t('badge.images')
   },
   {
     id: 3,
     icon: 'https://marathonphotos.live/img/Athletes_2.dce95e88.svg',
     number: '30',
     suffix: 'M',
-    title: 'Over 30 Million Athletes'
+    title: t('badge.athletes')
   },
   {
     id: 4,
     icon: 'https://marathonphotos.live/img/Events.a01b4893.svg',
     number: '8',
     suffix: 'K',
-    title: 'Over 8 Thousand Events'
+    title: t('badge.events')
   }
-]
+])
 </script>

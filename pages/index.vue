@@ -5,10 +5,11 @@
     <section class="container mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
       <div class="text-center mb-12">
         <h1 class="text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-          Find Your <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Race Photos</span>
+          {{ $t('hero.title') }}
+          <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{{ $t('hero.highlight') }}</span>
         </h1>
         <p class="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-          Search thousands of marathon and race events to find your perfect moment
+          {{ $t('hero.subtitle') }}
         </p>
       </div>
       <SearchArea @event-selected="handleEventSelected" />
@@ -52,7 +53,7 @@
             :to="`/event/${encodeURIComponent(selectedEvent.event)}`"
             class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl font-semibold transform hover:scale-105"
           >
-            View Event
+            {{ $t('event.viewEvent') }}
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>

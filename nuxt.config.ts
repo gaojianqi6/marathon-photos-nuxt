@@ -13,24 +13,26 @@ export default defineNuxtConfig({
 
   i18n: {
     locales: [
-      { code: 'en', name: 'English', flag: '🇬🇧' },
-      { code: 'en-US', name: 'US English', flag: '🇺🇸' },
-      { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
-      { code: 'cs', name: 'Čeština', flag: '🇨🇿' },
-      { code: 'da', name: 'Dansk', flag: '🇩🇰' },
-      { code: 'es', name: 'Español', flag: '🇪🇸' },
-      { code: 'fr', name: 'Français', flag: '🇫🇷' },
-      { code: 'el', name: 'Ελληνικά', flag: '🇬🇷' },
-      { code: 'it', name: 'Italiano', flag: '🇮🇹' },
-      { code: 'ja', name: '日本語', flag: '🇯🇵' },
-      { code: 'nl', name: 'Nederlands', flag: '🇳🇱' },
-      { code: 'no', name: 'Norsk', flag: '🇳🇴' },
-      { code: 'is', name: 'Íslenskur', flag: '🇮🇸' },
-      { code: 'pt', name: 'Português', flag: '🇵🇹' },
-      { code: 'sv', name: 'Svenska', flag: '🇸🇪' },
-      { code: 'zh-CN', name: '简体中文', flag: '🇨🇳' },
-      { code: 'zh-TW', name: '繁體中文', flag: '🇹🇼' }
+      { code: 'en', name: 'English', flag: '🇬🇧', file: 'en.json' },
+      { code: 'zh-CN', name: '简体中文', flag: '🇨🇳', file: 'zh-CN.json' },
+      { code: 'de', name: 'Deutsch', flag: '🇩🇪', file: 'de.json' }
+      // { code: 'en-US', name: 'US English', flag: '🇺🇸', file: 'en.json' },
+      // { code: 'cs', name: 'Čeština', flag: '🇨🇿', file: 'en.json' },
+      // { code: 'da', name: 'Dansk', flag: '🇩🇰', file: 'en.json' },
+      // { code: 'es', name: 'Español', flag: '🇪🇸', file: 'en.json' },
+      // { code: 'fr', name: 'Français', flag: '🇫🇷', file: 'en.json' },
+      // { code: 'el', name: 'Ελληνικά', flag: '🇬🇷', file: 'en.json' },
+      // { code: 'it', name: 'Italiano', flag: '🇮🇹', file: 'en.json' },
+      // { code: 'ja', name: '日本語', flag: '🇯🇵', file: 'en.json' },
+      // { code: 'nl', name: 'Nederlands', flag: '🇳🇱', file: 'en.json' },
+      // { code: 'no', name: 'Norsk', flag: '🇳🇴', file: 'en.json' },
+      // { code: 'is', name: 'Íslenskur', flag: '🇮🇸', file: 'en.json' },
+      // { code: 'pt', name: 'Português', flag: '🇵🇹', file: 'en.json' },
+      // { code: 'sv', name: 'Svenska', flag: '🇸🇪', file: 'en.json' },
+      // { code: 'zh-TW', name: '繁體中文', flag: '🇹🇼', file: 'zh-CN.json' }
     ],
+    lazy: true,
+    langDir: 'locales',
     defaultLocale: 'en',
     strategy: 'no_prefix',
     detectBrowserLanguage: {

@@ -1,0 +1,31 @@
+{
+  "nav": {
+    "home": "Home",
+    "cart": "CART",
+    "contact": "CONTACT",
+    "recentEvents": "RECENT EVENTS"
+  },
+  "hero": {
+    "title": "Find Your",
+    "highlight": "Event Photos",
+    "subtitle": "Search for your event to find and purchase your photos from world-class sports photography"
+  },
+  "search": {
+    "placeholder": "Search for an event name...",
+    "noResults": "No events found. Try a different search term.",
+    "error": "Failed to search events. Please try again."
+  },
+  "event": {
+    "viewEvent": "View Event",
+    "country": "Country",
+    "date": "Date"
+  },
+  "badge": {
+    "title": "Get your event LIVE with us!",
+    "subtitle": "Marathon Photos Live is world leading in event sports photography.",
+    "countries": "Operating in 70 Countries",
+    "images": "Over 200 Million Images",
+    "athletes": "Over 30 Million Athletes",
+    "events": "Over 8 Thousand Events"
+  }
+}

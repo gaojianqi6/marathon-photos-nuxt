@@ -45,7 +45,7 @@
         <input
           v-model="searchQuery"
           type="text"
-          placeholder="Search for an event name..."
+          :placeholder="$t('search.placeholder')"
           class="w-full pl-12 pr-4 py-4 text-base border-2 border-gray-200 rounded-xl shadow-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all duration-200 placeholder:text-gray-400 bg-white"
           @keydown.enter="performSearch"
         />
@@ -135,7 +135,7 @@
           <svg class="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
-          <p class="text-gray-600 text-sm font-medium">No events found. Try a different search term.</p>
+          <p class="text-gray-600 text-sm font-medium">{{ $t('search.noResults') }}</p>
         </div>
       </Transition>
     </div>
@@ -143,6 +143,7 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n()
 interface EventResult {
   country: string
   live: number
@@ -220,7 +221,7 @@ const performSearch = async () => {
     }
   } catch (error) {
     console.error('Search error:', error)
-    errorMessage.value = 'Failed to search events. Please try again.'
+            errorMessage.value = t('search.error')
     searchResults.value = []
   } finally {
     isLoading.value = false
