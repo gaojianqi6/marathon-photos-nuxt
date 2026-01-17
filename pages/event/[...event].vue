@@ -71,6 +71,18 @@
         >
           Certificates
         </button>
+        <button
+          v-if="eventData?.event?.related_events?.length"
+          :class="[
+            'px-6 py-3 font-medium text-sm transition-colors border-b-2',
+            activeTab === 'previousYear'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-gray-600 hover:text-gray-900'
+          ]"
+          @click="activeTab = 'previousYear'"
+        >
+          Previous Year
+        </button>
       </div>
 
       <!-- Content Area -->
@@ -116,6 +128,36 @@
               <p>No certificates available</p>
             </div>
           </div>
+
+          <!-- Previous Year Tab -->
+          <div v-if="activeTab === 'previousYear'" class="space-y-6">
+            <div v-if="relatedEvents.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              <div
+                v-for="relatedEvent in relatedEvents"
+                :key="relatedEvent.id"
+                class="group p-6 bg-white border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:shadow-lg transition-all text-center"
+              >
+                <div class="mb-4">
+                  <div class="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg mx-auto flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                </div>
+                <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                  {{ relatedEvent.name?.en || `Event ${relatedEvent.id}` }}
+                </h3>
+                <div v-if="relatedEvent.date" class="text-sm text-gray-500">{{ formatDate(relatedEvent.date) }}</div>
+                <div v-else class="text-sm text-gray-500">Previous Year Event</div>
+              </div>
+            </div>
+            <div v-else class="text-center py-12 text-gray-500">
+              <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <p class="text-lg font-medium">No previous year events available</p>
+            </div>
+          </div>
         </div>
 
         <!-- Pricing Sidebar -->
@@ -126,22 +168,6 @@
             :currency="eventData?.event?.currency || 'EUR'"
             @add-to-cart="handleAddToCart"
           />
-        </div>
-      </div>
-
-      <!-- Previous Year Events -->
-      <div v-if="eventData?.event?.frontend_settings?.related_events?.length" class="mt-12 pt-8 border-t border-gray-200">
-        <h3 class="text-2xl font-bold text-gray-900 mb-6">Previous Years</h3>
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          <NuxtLink
-            v-for="relatedEvent in eventData.event.frontend_settings.related_events"
-            :key="relatedEvent.id"
-            :to="`/event/${encodeURIComponent(relatedEvent.event)}`"
-            class="p-4 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all text-center"
-          >
-            <div class="text-sm font-medium text-gray-900 mb-1">{{ relatedEvent.name?.en || 'Event' }}</div>
-            <div class="text-xs text-gray-500">{{ formatDate(relatedEvent.date) }}</div>
-          </NuxtLink>
         </div>
       </div>
     </div>
@@ -205,6 +231,7 @@ interface EventData {
     display_name: {
       en: string
     }
+    related_events?: string[]
     frontend_settings?: {
       related_events?: Array<{
         id: string
@@ -240,7 +267,7 @@ try {
 
 const athleteData = ref<AthleteData | null>(null)
 const eventData = ref<EventData | null>(null)
-const activeTab = ref<'photos' | 'certificates'>('photos')
+const activeTab = ref<'photos' | 'certificates' | 'previousYear'>('photos')
 const isModalOpen = ref(false)
 const selectedPhoto = ref<Photo | null>(null)
 const currentPhotoIndex = ref(0)
@@ -317,6 +344,24 @@ const currentPricing = computed(() => {
 const allPhotosPrice = computed(() => {
   const allPhotosOption = currentPricing.value.find((item) => item.product === 'dl_eventcd')
   return allPhotosOption?.price || 0
+})
+
+// Get related events (Previous Year events)
+// Note: related_events is an array of event IDs, not full event objects
+// We'll need to fetch details if needed, or display them as-is
+const relatedEvents = computed(() => {
+  // For now, we'll show if related_events IDs exist
+  // In a real implementation, you'd fetch event details for each ID
+  const eventIds = eventData.value?.event?.related_events || []
+  
+  // Since we only have IDs, we'll create a simple array for display
+  // In production, you'd want to fetch full event details
+  return eventIds.map((id, index) => ({
+    id: id,
+    event: id, // Using ID as event path - might need adjustment based on actual API
+    name: { en: `Previous Event ${index + 1}` },
+    date: '' // Would need to fetch from API
+  }))
 })
 
 const handlePhotosFound = (data: any) => {

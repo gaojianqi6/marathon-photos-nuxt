@@ -121,7 +121,7 @@ Video
 €12.95
 
 Certificate Tab: One Certificate page can download, preview, and open a pop up to show the big picture.
-Previous Year:frontend_settings.related_events
+Previous Year Tab:frontend_settings.related_events
 
 Recent Events Page:
 Recent Events.
@@ -134,6 +134,8 @@ Event image: https://d2ewvgihbopi1g.cloudfront.net/photos/{event}/logo.gif
 We show the events group by the date, all the event on one date show together. and order date from bigger to smaller.
 show the display_name.en first, if no en attrs, we find what exists in display_name and show it
 and we need show the country icon.
+
+and use event go to event page.
 
 
 Event Organisers:
