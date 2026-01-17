@@ -137,8 +137,19 @@ and we need show the country icon.
 
 and use event go to event page.
 
+Contact Page:
+Event Organisers -> Register Your Event with US!(go to organiser page)
+Are you a Photographer? -> Register With us(go to photographer page)
+form: Contact
+Us.
+Your Name
+Email address
+Event name: Search for an Event
+Bib number (if known)
+Order Number
+Message
 
-Event Organisers:
+Event Organisers Page:
 Contact Us.
 Your Name
 Email address
