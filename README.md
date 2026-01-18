@@ -1,169 +1,231 @@
-This is a website rebuild version from https://marathonphotos.live/, this is a website for Athletes (the primary users), who search for and purchase photos; Event organisers, who register events; and Photographers, who provide their contact details.
+This is a website rebuild of [Marathon Photos Live](https://marathonphotos.live/), a platform designed for three main user types:
 
-At the main features and user flow. 
+- **Athletes** (primary users) - Search for and purchase their event photos
+- **Event Organisers** - Register and manage events
+- **Photographers** - Provide contact details for event coverage opportunities
 
-#### From what I can see, the core functionality includes:
+## Core Features & User Flow
 
-Home Page – Athletes use the search input to navigate to a specific event.
+### Home Page
+Athletes use the search functionality to find and navigate to specific events.
 
-Event / Competition Page – Athletes search for their photos using their bib number and add selected photos to the cart. There is also an option to upload a face image to find photos.
+### Event / Competition Page
+Athletes can search for their photos using their bib number or by uploading a face image for recognition. Selected photos can be added to the cart for purchase.
 
-Cart & Checkout – Users can place orders in the same currency and proceed to payment via a third-party payment provider.
+### Cart & Checkout
+Users can review their selected photos, place orders in the appropriate currency, and proceed to payment through a third-party payment provider.
 
-Registration Pages – Event organisers can register events, and photographers can provide their contact information.
+### Registration Pages
+Event organisers can register new events, while photographers can submit their contact information to be notified of coverage opportunities.
 
-Supporting Pages – Recent Events, Media Releases, and FAQ.
+### Supporting Pages
+Additional pages include Recent Events, Media Releases, and FAQ for support and information.
 
-The site also provides multi-language support, which is a strong feature, especially for international events.
+### Multi-language Support
+The site supports multiple languages, making it accessible for international events and users worldwide.
 
-#### What I would change
+## API Overview
 
-Improve the search experience for athletes
-The search input currently feels a bit inconsistent. For example, when characters are added or removed, there doesn’t always appear to be a backend request, and the feedback when a search fails could be clearer. Improving responsiveness and error messaging could make the experience smoother, especially for first-time users.
+All API responses use a `status` field to indicate request status: `ok`, `error`, or other status values.
 
-Refine the photo search method selection
-The face image upload feature is interesting, but from an athlete’s perspective, it may not be obvious or easy to use in its current position. If the goal is to help users find photos within a specific event, I would consider placing the face search option more prominently alongside the bib number search, perhaps using a simple toggle or switch to choose the search method.
+### 1. Search Events
 
-#### mainly API provide
-Use status to judge the request status. ok and error, or other status.
-1. Get the sports events, q is the search keyword: https://api.marathon-photos.com/website_api/v7/search?group=Sports&q=marathon&limit=100
-  When user search, status ok is there are data, use the result, the show name is: Month Abbreviations Year: display_name.en
-  ```JSON
-  {"status": "ok", "result": [{"country": "US", "live": 0, "display_name": {"en": "DONNA Marathon Weekend - Sunday"}, "event": "Sports/MPUS/2026/DONNA Marathon Weekend - Sunday", "eventid": "10880", "date": "2026-02-01"}}
-  ```
-  There isn't any data;
-  ```JSON
-  {"status": "ok", "result": []}
-  ```
-  There are some error when user input.
-  ```JSON
-  {"status": "error", "reason": "Exception: Please enter part of event name. handling search"}
-  ```
+**Endpoint:** `https://api.marathon-photos.com/website_api/v7/search?group=Sports&q=marathon&limit=100`
 
-#### Techstacks
-We need using nuxt.js, because we need handle the API CORS and SSR, we will using vue 3, and nuxt ui also.
+**Parameters:**
+- `q` - Search keyword for event names
+- `limit` - Maximum number of results to return
 
-#### Pages:
-Header and Footer for every page:
-Header: Home, CART, CONTACT, RECENT EVENTS. 
-Action in header: Change the language, English, DEUTSCH, CZECH, 简体中文.
+**Success Response (with results):**
+```json
+{
+  "status": "ok",
+  "result": [
+    {
+      "country": "US",
+      "live": 0,
+      "display_name": {"en": "DONNA Marathon Weekend - Sunday"},
+      "event": "Sports/MPUS/2026/DONNA Marathon Weekend - Sunday",
+      "eventid": "10880",
+      "date": "2026-02-01"
+    }
+  ]
+}
+```
 
-Footer:
-About us
-Marathon Photos Live is the world's leading mass participation event sports photography company operating since 1999, now in 70 countries
+**Success Response (no results):**
+```json
+{
+  "status": "ok",
+  "result": []
+}
+```
 
-Quick Links
-Home
-Recent Events
-Media Releases
-FAQ
-Contact
-My Order
-Privacy Policy
-Terms and Conditions
-Competition Terms and Conditions
-Refund and Replacement
+**Error Response:**
+```json
+{
+  "status": "error",
+  "reason": "Exception: Please enter part of event name. handling search"
+}
+```
 
-Facebook: [url(../img/fb-min.863eddaa.webp) no-repeat 0 0/cover](https://marathonphotos.live/img/fb-min.863eddaa.webp) - Rendered aspect ratio:	494∶329
+**Note:** When displaying event names, use the format: `Month Abbreviation Year: display_name.en`
 
-<img height="32" width="88" src="https://www.w3.org/WAI/WCAG22/wcag2.2A-blue" alt="Level A conformance,
-                    W3C WAI Web Content Accessibility Guidelines 2.2">
-Copyright © 2026 | Marathon-Photos.com Limited
+## Tech Stack
 
-Facebook Icon, Instagram Icon
+- **Nuxt.js** - Server-side rendering (SSR) for improved SEO and API request handling
+- **Vue 3** - Modern reactive framework for building interactive user interfaces
+- **Nuxt UI** - Component library for creating beautiful, consistent UI elements
+- **Nuxt Image** - Image optimization with lazy loading and masonry layout support to improve performance and reduce unnecessary image requests
+- **Nuxt i18n** - Internationalization module for multi-language support
+- **Pinia** - State management for shopping cart and application state
 
-Home Page:
-Search Area: Search the event name, and have the associate content below the search. content no image.
-Badge Area: 
-Get your event LIVE with us!
-Marathon Photos Live is world leading in event sports photography.
+## Page Structure
 
-https://marathonphotos.live/img/globe.4d188807.svg
-70
-Operating in 70 Countries
+### Header (All Pages)
+Navigation links: Home, Cart, Contact, Recent Events
 
-https://marathonphotos.live/img/camera.c6816ed2.svg
-200
-Over 200 Million Images
+**Header Actions:**
+- Language selector supporting: English, Deutsch (German), Czech, 简体中文 (Simplified Chinese)
 
-https://marathonphotos.live/img/Athletes_2.dce95e88.svg
-30
-Over 30 Million Athletes
+### Footer (All Pages)
 
-https://marathonphotos.live/img/Events.a01b4893.svg
-8
-Over 8 Thousand Events
+**About Us:**
+Marathon Photos Live is the world's leading mass participation event sports photography company, operating since 1999 and now serving 70 countries.
 
-Event/Competition Page:
-Get the athletes photos from bib number: https://api.marathon-photos.com/website_api/v7/details?event=Sports/2025/Athens%20Marathon%20The%20Authentic&bib=1234 , the example data can be read by: data/photos.json
+**Quick Links:**
+- Home
+- Recent Events
+- Media Releases
+- FAQ
+- Contact
+- My Order
+- Privacy Policy
+- Terms and Conditions
+- Competition Terms and Conditions
+- Refund and Replacement
 
-Title: Date, location, Event name
-Search Area: by bib number, by upload photos
+**Social Media:**
+- Facebook icon and link
+- Instagram icon and link
 
-Search Result: 
-A button: Buy all photos: ($ current currency depend on event location) price
-Congratulations Stefano!We've found
-108 
-photos of you
+**Accessibility & Copyright:**
+- WCAG 2.2 Level A conformance badge
+- Copyright © 2026 | Marathon-Photos.com Limited
 
-Photos Tab:
-All photos display by offset, use Masonry Layouts
-Click the photo have a pop up to show: the current photo, button to report this is not me
-Digital download options: Single Photo
-€12.95
-All Event Photos
-€29.95
-Photos Plus
-€34.95
-Your Photo Pack
-€39.95
-Video
-€12.95
+### Home Page
 
-Certificate Tab: One Certificate page can download, preview, and open a pop up to show the big picture.
-Previous Year Tab:frontend_settings.related_events
+**Search Area:**
+Users can search for event names with real-time search results displayed below the input field (results display text only, no images).
 
-Recent Events Page:
-Recent Events.
+**Badge/Statistics Section:**
+- **Heading:** "Get your event LIVE with us!"
+- **Subheading:** "Marathon Photos Live is world leading in event sports photography."
 
-Marathon Photos Live is the world's leading mass participation event sports photography company operating since 1999, now in 70 countries
+**Statistics Badges:**
+- 🌍 70 - Operating in 70 Countries
+- 📷 200 - Over 200 Million Images
+- 🏃 30 - Over 30 Million Athletes
+- 🎯 8 - Over 8 Thousand Events
 
-API: https://api.marathon-photos.com/website_api/v7/search?group=Sports&limit=20&upcoming=0
-API data example: data/events.json
-Event image: https://d2ewvgihbopi1g.cloudfront.net/photos/{event}/logo.gif
-We show the events group by the date, all the event on one date show together. and order date from bigger to smaller.
-show the display_name.en first, if no en attrs, we find what exists in display_name and show it
-and we need show the country icon.
+### Event / Competition Page
 
-and use event go to event page.
+**API Endpoint:**
+`https://api.marathon-photos.com/website_api/v7/details?event=Sports/2025/Athens%20Marathon%20The%20Authentic&bib=1234`
 
-Contact Page:
-Event Organisers -> Register Your Event with US!(go to organiser page)
-Are you a Photographer? -> Register With us(go to photographer page)
-form: Contact
-Us.
-Your Name
-Email address
-Event name: Search for an Event
-Bib number (if known)
-Order Number
-Message
+**Example Data:** See `data/photos.json`
 
-Event Organisers Page:
-Contact Us.
-Your Name
-Email address
-Event name: input searche vents
-Bib number (if known)
-Order Number
-Message
+**Page Header:**
+- Title format: "Date, Location, Event Name"
 
-Race photographers page:
-Apply now as a freelance photographer at Marathon Photos.
-Why Register with Marathon Photos?
+**Search Area:**
+- Search by bib number
+- Search by uploading a face photo
+
+**Search Results:**
+- "Buy all photos" button displaying the price in the event's currency
+- Congratulations message with athlete name: "Congratulations [Name]! We've found [count] photos of you"
+
+**Photos Tab:**
+- Photos displayed in a masonry layout, sorted by offset
+- Clicking a photo opens a modal with:
+  - Full-size photo display
+  - "Report this is not me" button
+  - Previous/Next navigation
+  - Photo ID display
+- **Digital Download Options:**
+  - Single Photo - €12.95 (example price, varies by currency)
+  - All Event Photos - €29.95
+  - Photos Plus - €34.95
+  - Your Photo Pack - €39.95
+  - Video - €12.95
+
+**Certificate Tab:**
+- Certificate preview and download functionality
+- Click to open full-size preview in modal
+
+**Previous Year Tab:**
+- Displays related events from `frontend_settings.related_events`
+
+### Recent Events Page
+
+**Page Header:**
+- Title: "Recent Events"
+- Description: "Marathon Photos Live is the world's leading mass participation event sports photography company operating since 1999, now in 70 countries"
+
+**API Endpoint:**
+`https://api.marathon-photos.com/website_api/v7/search?group=Sports&limit=20&upcoming=0`
+
+**Example Data:** See `data/events.json`
+
+**Event Image URL Pattern:**
+`https://d2ewvgihbopi1g.cloudfront.net/photos/{event}/logo.gif`
+
+**Display Logic:**
+- Events are grouped by date
+- All events on the same date are displayed together
+- Dates are ordered from newest to oldest (descending)
+- Display `display_name.en` when available; otherwise, show the first available language in `display_name`
+- Display country flag/icon for each event
+- Clicking an event navigates to the event detail page
+
+### Contact Page
+
+**Call-to-Action Sections:**
+- "Event Organisers" → Link to "Register Your Event with Us!" (navigates to organisers page)
+- "Are you a Photographer?" → Link to "Register With us" (navigates to photographer page)
+
+**Contact Form:**
+- Your Name
+- Email address
+- Event name (with search functionality)
+- Bib number (if known)
+- Order Number
+- Message
+
+### Event Organisers Page
+
+**Page Title:** "Contact Us"
+
+**Registration Form:**
+- Your Name
+- Email address
+- Event name (with event search input)
+- Bib number (if known)
+- Order Number
+- Message
+
+### Photographer Registration Page
+
+**Call-to-Action:**
+"Apply now as a freelance photographer at Marathon Photos."
+
+**Information Section:**
+"Why Register with Marathon Photos?"
+
 By registering, you'll enable our photographic partners to reach out to you when opportunities arise in your area. Whenever we have an event in your region that needs coverage, we'll notify registered photographers with details about the location, event date, and payment rate.
 
-Your Contact Details
-First Name
-Last Name
-Email address
+**Registration Form:**
+- First Name
+- Last Name
+- Email address
