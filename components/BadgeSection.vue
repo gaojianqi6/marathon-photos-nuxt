@@ -2,8 +2,8 @@
   <div class="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 py-20 lg:py-24 relative overflow-hidden">
     <!-- Background decoration -->
     <div class="absolute inset-0 opacity-5">
-      <div class="absolute top-0 left-0 w-96 h-96 bg-blue-500 rounded-full blur-3xl"></div>
-      <div class="absolute bottom-0 right-0 w-96 h-96 bg-purple-500 rounded-full blur-3xl"></div>
+      <div class="absolute top-0 left-0 w-96 h-96 bg-blue-500 rounded-full blur-3xl"/>
+      <div class="absolute bottom-0 right-0 w-96 h-96 bg-purple-500 rounded-full blur-3xl"/>
     </div>
 
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -27,7 +27,7 @@
               :src="badge.icon"
               :alt="badge.title"
               class="w-12 h-12 object-contain"
-            />
+            >
           </div>
           <div class="text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
             {{ badge.number }}{{ badge.suffix }}
@@ -40,33 +40,39 @@
 </template>
 
 <script setup lang="ts">
+// Import local SVG assets
+import globeIcon from '~/assets/images/badges/globe.svg'
+import cameraIcon from '~/assets/images/badges/camera.svg'
+import athletesIcon from '~/assets/images/badges/athletes.svg'
+import eventsIcon from '~/assets/images/badges/events.svg'
+
 const { t } = useI18n()
 
 const badges = computed(() => [
   {
     id: 1,
-    icon: 'https://marathonphotos.live/img/globe.4d188807.svg',
+    icon: globeIcon,
     number: '70',
     suffix: '',
     title: t('badge.countries')
   },
   {
     id: 2,
-    icon: 'https://marathonphotos.live/img/camera.c6816ed2.svg',
+    icon: cameraIcon,
     number: '200',
     suffix: 'M',
     title: t('badge.images')
   },
   {
     id: 3,
-    icon: 'https://marathonphotos.live/img/Athletes_2.dce95e88.svg',
+    icon: athletesIcon,
     number: '30',
     suffix: 'M',
     title: t('badge.athletes')
   },
   {
     id: 4,
-    icon: 'https://marathonphotos.live/img/Events.a01b4893.svg',
+    icon: eventsIcon,
     number: '8',
     suffix: 'K',
     title: t('badge.events')
