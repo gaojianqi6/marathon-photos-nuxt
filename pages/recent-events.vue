@@ -11,7 +11,8 @@
     </section>
 
     <!-- Events Section -->
-    <section class="container mx-auto px-4 sm:px-6 lg:px-8 pt-16 lg:pt-20">
+    <section class="pt-16 lg:pt-20">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Loading State -->
       <div v-if="isLoading" class="text-center py-20">
         <svg class="w-16 h-16 text-blue-600 mx-auto mb-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -29,10 +30,10 @@
       </div>
 
       <!-- Events Grouped by Date -->
-      <div v-else-if="groupedEvents.length > 0" class="space-y-16 mb-16 lg:mb-24">
+      <div v-else-if="groupedEvents.length > 0">
         <div v-for="group in groupedEvents" :key="group.date" class="space-y-6 pt-8 first:pt-0">
           <!-- Date Header -->
-          <div class="flex items-center gap-4 pb-4 border-b-2 border-gray-200">
+          <div class="flex items-center gap-4 pb-4 border-b-2 border-gray-200 px-4 sm:px-6 lg:px-8">
             <h2 class="text-2xl lg:text-3xl font-bold text-gray-900">
               {{ formatDateHeader(group.date) }}
             </h2>
@@ -42,7 +43,7 @@
           </div>
 
           <!-- Events Grid -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 lg:gap-6 max-w-7xl mx-auto">
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 lg:gap-6 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
             <NuxtLink
               v-for="event in group.events"
               :key="event.eventid"
@@ -50,36 +51,36 @@
               class="group bg-white border-2 border-gray-200 rounded-xl overflow-hidden hover:border-blue-500 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 flex flex-col"
             >
               <!-- Event Image -->
-              <div class="relative h-40 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden flex items-center justify-center flex-shrink-0">
+              <div class="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden flex items-center justify-center flex-shrink-0">
                 <img
                   :src="getEventImage(event.event)"
                   :alt="getEventName(event)"
-                  class="w-full h-full object-contain p-3"
+                  class="w-full h-full object-contain p-4"
                   @error="handleImageError"
                 >
               </div>
 
               <!-- Event Details -->
-              <div class="p-4 pb-0 h-[72px] flex items-start flex-shrink-0">
-                <h3 class="font-bold text-base text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 leading-tight">
+              <div class="p-5 pb-0 h-[80px] flex items-start flex-shrink-0">
+                <h3 class="font-bold text-lg text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 leading-tight">
                   {{ getEventName(event) }}
                 </h3>
               </div>
 
               <!-- Bottom Line -->
-              <div class="px-4 py-3 border-t border-gray-200 flex items-center justify-between h-[44px] flex-shrink-0 mt-auto">
+              <div class="px-5 py-3 border-t border-gray-200 flex items-center justify-between h-[48px] flex-shrink-0 mt-auto">
                 <!-- Country Flag -->
-                <div class="flex items-center gap-1.5 text-gray-600">
-                  <span class="text-base" :title="getCountryName(event.country)">
+                <div class="flex items-center gap-2 text-gray-600">
+                  <span class="text-lg" :title="getCountryName(event.country)">
                     {{ getCountryFlag(event.country) }}
                   </span>
-                  <span class="text-xs font-medium">{{ event.country }}</span>
+                  <span class="text-sm font-medium">{{ event.country }}</span>
                 </div>
                 
                 <!-- Live Status (only show if live) -->
                 <div v-if="event.live" class="flex items-center gap-1.5 flex-shrink-0">
-                  <span class="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"/>
-                  <span class="text-[10px] font-semibold text-gray-600 uppercase">Live</span>
+                  <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"/>
+                  <span class="text-xs font-semibold text-gray-600 uppercase">Live</span>
                 </div>
                 <div v-else class="w-0"/>
               </div>
@@ -89,13 +90,15 @@
       </div>
 
       <!-- No Events State -->
-      <div v-else class="text-center py-20">
+      <div v-else class="text-center py-20 px-4 sm:px-6 lg:px-8">
         <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
         <p class="text-gray-600 text-lg">No recent events found</p>
       </div>
+      </div>
     </section>
+    <div class="h-16"/>
   </div>
 </template>
 
