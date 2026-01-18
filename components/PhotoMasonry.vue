@@ -9,13 +9,22 @@
         @click="openPhotoModal(photo)"
       >
         <div class="relative overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] bg-gray-100">
-          <img
-            :src="photo.url"
-            :alt="`Photo ${photo.id}`"
-            class="w-full h-auto object-cover rounded-lg"
-            loading="lazy"
-            @error="handleImageError"
-          />
+          <!-- Use aspect ratio container to reserve space and prevent layout shift -->
+          <div 
+            class="w-full relative"
+            :style="{ paddingBottom: `${calculateAspectRatio(photo)}%` }"
+          >
+            <NuxtImg
+              :src="photo.url"
+              :alt="`Photo ${photo.id}`"
+              class="absolute inset-0 w-full h-full object-cover rounded-lg"
+              loading="lazy"
+              placeholder
+              :placeholder-class="'bg-gray-200 animate-pulse'"
+              fit="cover"
+              @error="handleImageError"
+            />
+          </div>
           <!-- Hover overlay -->
           <div class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100 rounded-lg">
             <svg class="w-10 h-10 text-white transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -109,6 +118,21 @@ const handleAddToCart = (photo: Photo) => {
   if (!isPhotoInCart(photo)) {
     emit('addToCart', photo)
   }
+}
+
+// Calculate aspect ratio based on photo orientation or use default
+// This reserves space to prevent layout shift while images load
+const calculateAspectRatio = (photo: Photo): number => {
+  // Use orientation if available
+  if (photo.orientation === 'portrait') {
+    return 133.33 // 3:4 aspect ratio (height/width = 4/3)
+  } else if (photo.orientation === 'landscape') {
+    return 66.67 // 3:2 aspect ratio (height/width = 2/3)
+  }
+  
+  // Default to 4:3 aspect ratio (75%) for unknown orientation
+  // This prevents layout shift while maintaining reasonable dimensions
+  return 75
 }
 
 const handleImageError = (event: Event) => {
