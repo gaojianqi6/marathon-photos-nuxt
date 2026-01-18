@@ -33,7 +33,7 @@
             @click.stop="handleAddToCart(photo)"
             :disabled="isPhotoInCart(photo)"
             :class="[
-              'absolute bottom-2 right-2 bg-blue-600 text-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-blue-700 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed',
+              'absolute bottom-2 right-2 bg-blue-600 text-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-blue-700 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer',
               isPhotoInCart(photo) && 'bg-gray-400'
             ]"
             :title="isPhotoInCart(photo) ? 'Already in cart' : 'Add to cart'"

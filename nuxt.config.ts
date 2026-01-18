@@ -32,7 +32,9 @@ export default defineNuxtConfig({
       // { code: 'sv', name: 'Svenska', flag: '🇸🇪', file: 'en.json' },
       // { code: 'zh-TW', name: '繁體中文', flag: '🇹🇼', file: 'zh-CN.json' }
     ],
-    lazy: true,
+    compilation: {
+      strictMessage: false
+    },
     langDir: 'locales',
     defaultLocale: 'en',
     strategy: 'no_prefix',
@@ -46,7 +48,9 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
 
   // Ensure UI module is properly configured
-  ui: {
-    global: true
+  app: {
+    head: {
+      title: 'Marathon Photos Live'
+    }
   }
 })

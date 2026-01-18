@@ -39,7 +39,7 @@
             </p>
           </div>
           <button
-            class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl font-bold text-lg whitespace-nowrap"
+            class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl font-bold text-lg whitespace-nowrap cursor-pointer"
             @click="handleBuyAllPhotos"
           >
             Buy All Photos: {{ formatPrice(allPhotosPrice) }}
@@ -183,6 +183,7 @@
             v-if="athleteData.currency_pricing"
             :pricing="currentPricing"
             :currency="eventData?.event?.currency || 'EUR'"
+            :event="actualEventPath"
             @add-to-cart="handleAddToCart"
           />
         </div>
@@ -300,6 +301,14 @@ if (isBibNumber) {
   actualEventPath = pathSegments.join('/')
 } else {
   actualEventPath = eventPath
+}
+
+const cartStore = useCartStore()
+const toast = useToast()
+
+// Ensure toast is available on client side
+if (import.meta.client && !toast) {
+  console.warn('useToast() not available')
 }
 
 const eventSearchRef = ref<InstanceType<typeof EventSearch> | null>(null)
@@ -457,7 +466,52 @@ const handleBuyAllPhotos = () => {
   }
 }
 
-const cartStore = useCartStore()
+const showNotification = (result: { success: boolean; replacedItems?: string[]; message?: string; alreadyInCart?: boolean }, itemName: string, photoId?: string) => {
+  if (import.meta.server) return // Only show notifications on client side
+  
+  if (!toast) {
+    console.error('Toast not available')
+    return
+  }
+  
+  if (!result.success) {
+    if (result.alreadyInCart) {
+      toast.add({
+        title: 'Already in Cart',
+        description: photoId ? `${itemName} (Photo ID: ${photoId}) is already in your cart` : (result.message || `${itemName} is already in your cart`),
+        color: 'amber',
+        timeout: 3000,
+        icon: 'i-heroicons-exclamation-triangle',
+        progress: true
+      })
+    } else {
+      toast.add({
+        title: 'Error',
+        description: photoId ? `Failed to add ${itemName} (Photo ID: ${photoId}) to cart` : (result.message || `Failed to add ${itemName} to cart`),
+        color: 'red',
+        timeout: 3000,
+        icon: 'i-heroicons-x-circle',
+        progress: true
+      })
+    }
+    return
+  }
+
+  const description = photoId 
+    ? `${itemName} (Photo ID: ${photoId}) added to cart${result.replacedItems && result.replacedItems.length > 0 ? `. Replaced: ${result.replacedItems.join(', ')}` : ' successfully'}`
+    : (result.replacedItems && result.replacedItems.length > 0
+        ? `${itemName} added to cart. Replaced: ${result.replacedItems.join(', ')}`
+        : `${itemName} added to cart successfully`)
+
+  toast.add({
+    title: 'Item Added',
+    description,
+    color: 'green',
+    timeout: 3000,
+    icon: 'i-heroicons-check-circle',
+    progress: true
+  })
+}
 
 // Get single photo price
 const singlePhotoPrice = computed(() => {
@@ -494,7 +548,8 @@ const handleAddToCart = (option: any) => {
     bibNumber: currentBibNumber.value || undefined
   }
   
-  cartStore.addItem(cartItem)
+  const result = cartStore.addItem(cartItem)
+  showNotification(result, option.name || 'Item')
 }
 
 // Handle add to cart from PhotoMasonry/PhotoModal (single photo)
@@ -503,6 +558,14 @@ const handlePhotoAddToCart = (photo: Photo) => {
   
   // Check if photo is already in cart
   if (cartStore.isPhotoInCart(actualEventPath, photo.id)) {
+    toast.add({
+      title: 'Already in Cart',
+      description: `This photo (Photo ID: ${photo.id}) is already in your cart`,
+      color: 'amber',
+      timeout: 3000,
+      icon: 'i-heroicons-exclamation-triangle',
+      progress: true
+    })
     return
   }
   
@@ -520,7 +583,8 @@ const handlePhotoAddToCart = (photo: Photo) => {
   const allEventPhotosOption = currentPricing.value.find((item) => item.product === 'dl_eventcd')
   
   // Add the single photo - the store will check if total >= All Event Photos and replace
-  cartStore.addItem(cartItem, allEventPhotosOption)
+  const result = cartStore.addItem(cartItem, allEventPhotosOption ? { product: allEventPhotosOption.product, price: allEventPhotosOption.price } : null)
+  showNotification(result, 'Photo', photo.id)
 }
 
 const openPhotoModal = (photo: Photo) => {

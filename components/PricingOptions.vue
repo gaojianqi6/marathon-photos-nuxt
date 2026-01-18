@@ -6,10 +6,24 @@
       <div
         v-for="option in pricingOptions"
         :key="option.product"
-        class="p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all cursor-pointer"
-        :class="{ 'border-blue-500 bg-blue-50': selectedOption === option.product }"
+        class="relative p-4 border-2 rounded-lg hover:shadow-md transition-all cursor-pointer"
+        :class="{
+          'border-blue-500 bg-blue-50': selectedOption === option.product && !isProductInCart(option.product),
+          'border-gray-200': selectedOption !== option.product && !isProductInCart(option.product)
+        }"
         @click="selectOption(option)"
       >
+        <!-- In Cart Icon (absolute positioned top-right) -->
+        <div
+          v-if="isProductInCart(option.product)"
+          class="absolute top-1.5 right-1.5 w-3.5 h-3.5 bg-green-500 rounded-full flex items-center justify-center z-10"
+          title="Already in cart"
+        >
+          <svg class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        
         <div class="flex items-center justify-between">
           <div class="flex-1">
             <div class="font-semibold text-gray-900">{{ option.name }}</div>
@@ -26,7 +40,7 @@
 
     <button
       :disabled="!selectedOption"
-      class="w-full mt-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+      class="w-full mt-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
       @click="addToCart"
     >
       Add to Cart
@@ -35,6 +49,8 @@
 </template>
 
 <script setup lang="ts">
+import { useCartStore } from '~/stores/cart'
+
 interface PricingOption {
   product: string
   name: string
@@ -46,10 +62,12 @@ interface PricingOption {
 interface Props {
   pricing: PricingOption[]
   currency?: string
+  event?: string
 }
 
 const props = defineProps<Props>()
 const selectedOption = ref<string | null>(null)
+const cartStore = useCartStore()
 
 const emit = defineEmits<{
   addToCart: [option: PricingOption]
@@ -80,6 +98,11 @@ const pricingOptions = computed(() => {
     }))
 })
 
+const isProductInCart = (product: string) => {
+  if (!props.event) return false
+  return cartStore.isProductInCart(props.event, product)
+}
+
 const selectOption = (option: PricingOption) => {
   selectedOption.value = option.product
 }
@@ -93,7 +116,6 @@ const addToCart = () => {
   
   if (option) {
     emit('addToCart', option)
-    // TODO: Show success message
   }
 }
 

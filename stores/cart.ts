@@ -7,24 +7,30 @@ export interface CartItem {
   currency: string
   event: string // Event path for grouping
   photoId?: string // Only for single photos (dl_20x30)
+  bibNumber?: string // Bib number associated with the item
   quantity?: number
-  bibNumber?: string // Bib number to navigate to event page with athlete photos
+}
+
+interface PricingOption {
+  product: string
+  name: string
+  price: number
+  description?: string
+  currency?: string
 }
 
 interface CartState {
   items: CartItem[]
 }
 
-const STORAGE_KEY = 'marathon-photos-cart'
-
-// Allowed product types
-export const ALLOWED_PRODUCTS = {
-  'dl_20x30': 'Single Photo',
-  'dl_eventcd': 'All Event Photos',
-  'dl_digsuperpack': 'Photos Plus',
-  'dl_megapack': 'Your Photo Pack',
-  '$movie': 'Video'
+export interface AddItemResult {
+  success: boolean
+  replacedItems?: string[]
+  message?: string
+  alreadyInCart?: boolean
 }
+
+const STORAGE_KEY = 'marathon-photos-cart'
 
 export const useCartStore = defineStore('cart', {
   state: (): CartState => ({
@@ -32,11 +38,9 @@ export const useCartStore = defineStore('cart', {
   }),
 
   getters: {
-    totalItems: (state) => state.items.length,
-    
-    totalPrice: (state) => {
-      return state.items.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0)
-    },
+    itemCount: (state) => state.items.length,
+    totalItems: (state) => state.items.length, // Alias for itemCount for compatibility
+    totalPrice: (state) => state.items.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0),
 
     // Get items grouped by event
     itemsByEvent: (state) => {
@@ -45,9 +49,8 @@ export const useCartStore = defineStore('cart', {
         if (!grouped[item.event]) {
           grouped[item.event] = []
         }
-        const eventGroup = grouped[item.event]
-        if (eventGroup) {
-          eventGroup.push(item)
+        if (grouped[item.event]) {
+          grouped[item.event].push(item)
         }
       })
       return grouped
@@ -70,6 +73,23 @@ export const useCartStore = defineStore('cart', {
       )
       
       return hasBundle
+    },
+
+    // Check if a product is already in cart
+    isProductInCart: (state) => (event: string, product: string) => {
+      const eventItems = state.items.filter(item => item.event === event)
+      
+      // For bundles, check if any bundle exists (they're mutually exclusive)
+      if (['dl_eventcd', 'dl_digsuperpack', 'dl_megapack'].includes(product)) {
+        return eventItems.some(item => ['dl_eventcd', 'dl_digsuperpack', 'dl_megapack'].includes(item.product))
+      }
+      
+      // For video, check if video exists
+      if (product === '$movie') {
+        return eventItems.some(item => item.product === '$movie')
+      }
+      
+      return false
     },
 
     // Get total price for a specific event
@@ -109,13 +129,21 @@ export const useCartStore = defineStore('cart', {
     // Add item to cart with replacement logic
     // Replacement hierarchy: Single -> All -> Plus -> Pack
     // Only one of All/Plus/Pack can exist (expensive one includes cheaper ones)
-    addItem(item: CartItem, allEventPhotosOption?: { product: string; price: number } | null) {
+    // Returns: { success: boolean, replacedItems?: string[], message?: string }
+    addItem(item: CartItem, allEventPhotosOption?: { product: string; price: number } | null): AddItemResult {
       // Get items for this event
       const eventItems = this.items.filter(i => i.event === item.event)
+      const replacedItems: string[] = []
       
       // Handle replacement logic based on product type
       if (item.product === 'dl_megapack') {
         // Photo Pack (most expensive) replaces Photos Plus, All Event Photos, and all single photos
+        const removedItems = eventItems.filter(i => ['dl_digsuperpack', 'dl_eventcd', 'dl_20x30'].includes(i.product))
+        removedItems.forEach(i => {
+          if (i.product === 'dl_digsuperpack') replacedItems.push('Photos Plus')
+          else if (i.product === 'dl_eventcd') replacedItems.push('All Event Photos')
+          else if (i.product === 'dl_20x30') replacedItems.push(`${removedItems.filter(x => x.product === 'dl_20x30').length} single photo(s)`)
+        })
         this.items = this.items.filter(i => 
           !(i.event === item.event && ['dl_digsuperpack', 'dl_eventcd', 'dl_20x30'].includes(i.product))
         )
@@ -125,8 +153,13 @@ export const useCartStore = defineStore('cart', {
         const hasPhotoPack = eventItems.some(i => i.product === 'dl_megapack')
         if (hasPhotoPack) {
           // Photo Pack already includes Photos Plus, don't add
-          return
+          return { success: false, alreadyInCart: true, message: 'Photo Pack already includes Photos Plus' }
         }
+        const removedItems = eventItems.filter(i => ['dl_eventcd', 'dl_20x30'].includes(i.product))
+        removedItems.forEach(i => {
+          if (i.product === 'dl_eventcd') replacedItems.push('All Event Photos')
+          else if (i.product === 'dl_20x30') replacedItems.push(`${removedItems.filter(x => x.product === 'dl_20x30').length} single photo(s)`)
+        })
         this.items = this.items.filter(i => 
           !(i.event === item.event && ['dl_eventcd', 'dl_20x30'].includes(i.product))
         )
@@ -137,7 +170,7 @@ export const useCartStore = defineStore('cart', {
         const hasPhotosPlus = eventItems.some(i => i.product === 'dl_digsuperpack')
         if (hasPhotoPack || hasPhotosPlus) {
           // Bundle already includes All Event Photos, don't add
-          return
+          return { success: false, alreadyInCart: true, message: 'Already included in a bundle' }
         }
         
         const singlePhotos = eventItems.filter(i => i.product === 'dl_20x30')
@@ -145,12 +178,15 @@ export const useCartStore = defineStore('cart', {
         
         if (singlePhotosTotal >= item.price) {
           // Remove all single photos and add All Event Photos
+          if (singlePhotos.length > 0) {
+            replacedItems.push(`${singlePhotos.length} single photo(s)`)
+          }
           this.items = this.items.filter(i => 
             !(i.event === item.event && i.product === 'dl_20x30')
           )
         } else {
           // Keep single photos, don't add All Event Photos
-          return
+          return { success: false, message: 'Single photos total is less than All Event Photos price' }
         }
       } else if (item.product === 'dl_20x30') {
         // Single photo: check replacement logic
@@ -159,7 +195,7 @@ export const useCartStore = defineStore('cart', {
         const hasPhotoPack = eventItems.some(i => i.product === 'dl_megapack')
         const hasPhotosPlus = eventItems.some(i => i.product === 'dl_digsuperpack')
         if (hasPhotoPack || hasPhotosPlus) {
-          return
+          return { success: false, alreadyInCart: true, message: 'Photo is already included in a bundle' }
         }
         
         // Check if this single photo already exists
@@ -168,7 +204,7 @@ export const useCartStore = defineStore('cart', {
         )
         if (existing) {
           // Already in cart, don't add again
-          return
+          return { success: false, alreadyInCart: true, message: 'Photo is already in cart' }
         }
         
         // Check if total single photos price >= All Event Photos
@@ -193,6 +229,9 @@ export const useCartStore = defineStore('cart', {
         // If we have All Event Photos price and total single photos >= it, replace with All Event Photos
         if (allEventPhotosPrice !== null && newSinglePhotosTotal >= allEventPhotosPrice) {
           // Replace all single photos with All Event Photos
+          if (singlePhotos.length > 0) {
+            replacedItems.push(`${singlePhotos.length + 1} single photo(s)`)
+          }
           this.items = this.items.filter(i => 
             !(i.event === item.event && i.product === 'dl_20x30')
           )
@@ -210,7 +249,7 @@ export const useCartStore = defineStore('cart', {
               // Can't create All Event Photos without price info, just add the single photo
               this.items.push(item)
               this.saveCart()
-              return
+              return { success: true }
             }
             // Create new All Event Photos item
             this.items.push({
@@ -223,12 +262,28 @@ export const useCartStore = defineStore('cart', {
             })
           }
           this.saveCart()
-          return
+          return { success: true, replacedItems, message: 'Replaced single photos with All Event Photos' }
+        }
+      } else if (item.product === '$movie') {
+        // Video is a standalone product, no replacement logic with photos
+        // Check if video already exists for this event
+        const existingVideo = eventItems.find(i => i.product === '$movie')
+        if (existingVideo) {
+          // Video already in cart, don't add again
+          return { success: false, alreadyInCart: true, message: 'Video is already in cart' }
         }
       }
-      
+
       // For bundles (All/Plus/Pack), remove existing bundle of same type or lower tier
       if (['dl_eventcd', 'dl_digsuperpack', 'dl_megapack'].includes(item.product)) {
+        const removedBundles = eventItems.filter(
+          i => ['dl_eventcd', 'dl_digsuperpack', 'dl_megapack'].includes(i.product)
+        )
+        removedBundles.forEach(i => {
+          if (i.product === 'dl_eventcd') replacedItems.push('All Event Photos')
+          else if (i.product === 'dl_digsuperpack') replacedItems.push('Photos Plus')
+          else if (i.product === 'dl_megapack') replacedItems.push('Photo Pack')
+        })
         // Remove all photo bundles for this event (they're mutually exclusive)
         this.items = this.items.filter(
           i => !(i.event === item.event && ['dl_eventcd', 'dl_digsuperpack', 'dl_megapack'].includes(i.product))
@@ -238,6 +293,12 @@ export const useCartStore = defineStore('cart', {
       // Add new item
       this.items.push(item)
       this.saveCart()
+      
+      return { 
+        success: true, 
+        replacedItems: replacedItems.length > 0 ? replacedItems : undefined,
+        message: replacedItems.length > 0 ? `Replaced ${replacedItems.join(', ')}` : undefined
+      }
     },
 
     // Remove item from cart

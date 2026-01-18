@@ -82,7 +82,7 @@
                     'flex items-center gap-2 px-6 py-3 rounded-lg transition-all font-medium text-sm shadow-md hover:shadow-lg',
                     isPhotoInCart
                       ? 'bg-gray-400 text-white cursor-not-allowed'
-                      : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700'
+                      : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 cursor-pointer'
                   ]"
                 >
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
