@@ -176,7 +176,7 @@ export const useCartStore = defineStore('cart', {
           !(i.event === item.event && ['dl_eventcd', 'dl_20x30'].includes(i.product))
         )
       } else if (item.product === 'dl_eventcd') {
-        // All Event Photos replaces all single photos if total single photo price is higher
+        // All Event Photos replaces all single photos (always, when adding directly)
         // But if Photos Plus or Photo Pack exists, don't add All Event Photos
         const hasPhotoPack = eventItems.some(i => i.product === 'dl_megapack')
         const hasPhotosPlus = eventItems.some(i => i.product === 'dl_digsuperpack')
@@ -191,20 +191,14 @@ export const useCartStore = defineStore('cart', {
           return { success: false, alreadyInCart: true, message: 'All Event Photos is already in cart' }
         }
         
-        // If adding directly (not replacing), always allow it
-        // Otherwise, check if single photos should be replaced
+        // When adding All Event Photos directly, always replace single photos
         const singlePhotos = eventItems.filter(i => i.product === 'dl_20x30')
         if (singlePhotos.length > 0) {
-          const singlePhotosTotal = singlePhotos.reduce((sum, i) => sum + (i.price * (i.quantity || 1)), 0)
-          
-          if (singlePhotosTotal >= item.price) {
-            // Remove all single photos and add All Event Photos
-            replacedItems.push(`${singlePhotos.length} single photo(s)`)
-            this.items = this.items.filter(i => 
-              !(i.event === item.event && i.product === 'dl_20x30')
-            )
-          }
-          // If single photos total is less, still allow adding All Event Photos (user clicked button directly)
+          // Always remove all single photos when adding All Event Photos directly
+          replacedItems.push(`${singlePhotos.length} single photo(s)`)
+          this.items = this.items.filter(i => 
+            !(i.event === item.event && i.product === 'dl_20x30')
+          )
         }
       } else if (item.product === 'dl_20x30') {
         // Single photo: check replacement logic
