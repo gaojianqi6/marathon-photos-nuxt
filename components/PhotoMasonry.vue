@@ -23,10 +23,26 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
-          <!-- Offset badge (optional, can be removed if not needed) -->
-          <div v-if="photo.offset !== undefined && photo.offset !== null" class="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-            Offset {{ photo.offset }}
+          <!-- Photo ID badge -->
+          <div v-if="photo.id" class="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+            ID: {{ photo.id }}
           </div>
+          <!-- Add to Cart icon (bottom right) -->
+          <button
+            v-if="eventPath"
+            @click.stop="handleAddToCart(photo)"
+            :disabled="isPhotoInCart(photo)"
+            :class="[
+              'absolute bottom-2 right-2 bg-blue-600 text-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-blue-700 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed',
+              isPhotoInCart(photo) && 'bg-gray-400'
+            ]"
+            :title="isPhotoInCart(photo) ? 'Already in cart' : 'Add to cart'"
+            aria-label="Add to cart"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+          </button>
         </div>
       </div>
     </div>
@@ -51,13 +67,23 @@ interface Photo {
 
 interface Props {
   photos: Photo[]
+  eventPath?: string
 }
 
 const props = defineProps<Props>()
 
 const emit = defineEmits<{
   photoClick: [photo: Photo]
+  addToCart: [photo: Photo]
 }>()
+
+const cartStore = useCartStore()
+
+// Check if photo is in cart
+const isPhotoInCart = (photo: Photo) => {
+  if (!props.eventPath) return false
+  return cartStore.isPhotoInCart(props.eventPath, photo.id)
+}
 
 // Sort photos by offset, then by score for better display
 const sortedPhotos = computed(() => {
@@ -77,6 +103,12 @@ const sortedPhotos = computed(() => {
 
 const openPhotoModal = (photo: Photo) => {
   emit('photoClick', photo)
+}
+
+const handleAddToCart = (photo: Photo) => {
+  if (!isPhotoInCart(photo)) {
+    emit('addToCart', photo)
+  }
 }
 
 const handleImageError = (event: Event) => {

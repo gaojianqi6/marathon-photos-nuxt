@@ -240,7 +240,10 @@ const { locale, locales, setLocale } = useI18n()
 const mobileMenuOpen = ref(false)
 const languageDropdownOpen = ref(false)
 const mobileLanguageDropdownOpen = ref(false)
-const cartCount = ref(0) // You can connect this to your cart store/composable
+const cartStore = useCartStore()
+
+// Get cart count from store
+const cartCount = computed(() => cartStore.totalItems)
 
 // Get available locales
 const availableLocales = computed(() => {
@@ -276,8 +279,8 @@ const handleClickOutside = (event: MouseEvent) => {
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
-  // Initialize cart count from store or localStorage
-  // cartCount.value = useCartStore().items.length
+  // Initialize cart from localStorage
+  cartStore.loadCart()
 })
 
 onUnmounted(() => {

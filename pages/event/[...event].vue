@@ -108,7 +108,9 @@
           <div v-if="activeTab === 'photos'">
             <PhotoMasonry
               :photos="allPhotos"
+              :event-path="actualEventPath"
               @photo-click="openPhotoModal"
+              @add-to-cart="handlePhotoAddToCart"
             />
           </div>
 
@@ -193,10 +195,12 @@
       :photo="selectedPhoto"
       :all-photos="allPhotos"
       :current-index="currentPhotoIndex"
+      :event-path="actualEventPath"
       @close="closeModal"
       @next="nextPhoto"
       @previous="previousPhoto"
       @report-not-me="handleReportNotMe"
+      @add-to-cart="handlePhotoAddToCart"
     />
   </div>
 </template>
@@ -453,10 +457,51 @@ const handleBuyAllPhotos = () => {
   }
 }
 
+const cartStore = useCartStore()
+
+// Get single photo price
+const singlePhotoPrice = computed(() => {
+  const singlePhotoOption = currentPricing.value.find((item) => item.product === 'dl_20x30')
+  return singlePhotoOption?.price || 0
+})
+
+// Get currency
+const currency = computed(() => eventData.value?.event?.currency || 'EUR')
+
+// Handle add to cart from PricingOptions (bundles)
 const handleAddToCart = (option: any) => {
-  // TODO: Implement add to cart functionality
-  console.log('Add to cart:', option)
-  // You can emit this to a cart store or composable
+  if (!actualEventPath || !option) return
+  
+  const cartItem = {
+    product: option.product,
+    name: option.name,
+    price: option.price,
+    currency: currency.value,
+    event: actualEventPath
+  }
+  
+  cartStore.addItem(cartItem)
+}
+
+// Handle add to cart from PhotoMasonry/PhotoModal (single photo)
+const handlePhotoAddToCart = (photo: Photo) => {
+  if (!actualEventPath || !photo || singlePhotoPrice.value === 0) return
+  
+  // Check if photo is already in cart
+  if (cartStore.isPhotoInCart(actualEventPath, photo.id)) {
+    return
+  }
+  
+  const cartItem = {
+    product: 'dl_20x30',
+    name: 'Single Photo',
+    price: singlePhotoPrice.value,
+    currency: currency.value,
+    event: actualEventPath,
+    photoId: photo.id
+  }
+  
+  cartStore.addItem(cartItem)
 }
 
 const openPhotoModal = (photo: Photo) => {
@@ -520,6 +565,9 @@ const formatPrice = (price: number, currency: string = 'EUR'): string => {
 
 // Load event data on mount if available
 onMounted(async () => {
+  // Initialize cart store and load from localStorage
+  cartStore.loadCart()
+  
   // If there's a bib number in the URL, automatically search for photos
   // But skip if we already have data for this bib (to prevent duplicate requests)
   if (initialBibNumber && eventSearchRef.value && athleteData.value?.bib !== initialBibNumber) {

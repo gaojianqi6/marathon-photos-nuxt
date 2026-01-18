@@ -25,9 +25,9 @@
     </div>
 
     <button
-      @click="addToCart"
       :disabled="!selectedOption"
       class="w-full mt-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+      @click="addToCart"
     >
       Add to Cart
     </button>
@@ -55,7 +55,7 @@ const emit = defineEmits<{
   addToCart: [option: PricingOption]
 }>()
 
-// Map product codes to display names
+// Map product codes to display names - only these 4 products are allowed
 const productNames: Record<string, string> = {
   'dl_20x30': 'Single Photo',
   'dl_eventcd': 'All Event Photos',
@@ -64,9 +64,15 @@ const productNames: Record<string, string> = {
   '$movie': 'Video'
 }
 
+// Only allow these 3 bundle product types (exclude single photo - it's added via photo icons)
+const ALLOWED_PRODUCTS = ['dl_eventcd', 'dl_digsuperpack', 'dl_megapack', '$movie']
+
 const pricingOptions = computed(() => {
   return props.pricing
-    .filter((item) => item.price > 0) // Filter out unavailable options (price -1)
+    .filter((item) => 
+      item.price > 0 && // Filter out unavailable options (price -1)
+      ALLOWED_PRODUCTS.includes(item.product) // Only show allowed products
+    )
     .map((item) => ({
       ...item,
       name: productNames[item.product] || item.product,
