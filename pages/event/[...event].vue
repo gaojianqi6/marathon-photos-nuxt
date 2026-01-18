@@ -101,9 +101,9 @@
       </div>
 
       <!-- Content Area (only show if photos found) -->
-      <div v-if="totalPhotos > 0" class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div v-if="totalPhotos > 0" class="grid grid-cols-1 gap-8" :class="activeTab === 'photos' ? 'lg:grid-cols-4' : 'lg:grid-cols-1'">
         <!-- Photos / Certificates -->
-        <div :class="['lg:col-span-3', activeTab === 'certificates' ? '' : '']">
+        <div :class="activeTab === 'photos' ? 'lg:col-span-3' : 'lg:col-span-1'">
           <!-- Photos Tab -->
           <div v-if="activeTab === 'photos'">
             <PhotoMasonry
@@ -115,25 +115,25 @@
           </div>
 
           <!-- Certificates Tab -->
-          <div v-if="activeTab === 'certificates'" class="space-y-6">
-            <div v-if="certificates.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div v-if="activeTab === 'certificates'" class="space-y-6 -mx-4 sm:-mx-6 lg:-mx-8">
+            <div v-if="certificates.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4 px-4 sm:px-6 lg:px-8">
               <div
                 v-for="cert in certificates"
                 :key="cert.product"
-                class="bg-white border-2 border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                class="bg-white border-2 border-gray-200 rounded-xl p-5 hover:shadow-lg transition-shadow cursor-pointer"
                 @click="openCertificateModal(cert)"
               >
                 <div class="aspect-[4/3] bg-gray-100 rounded-lg mb-4 flex items-center justify-center">
-                  <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-14 h-14 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
-                <h3 class="font-semibold text-gray-900 mb-2">{{ cert.name || 'Certificate' }}</h3>
-                <div class="flex items-center justify-between">
+                <h3 class="font-semibold text-gray-900 mb-2 text-base">{{ cert.name || 'Certificate' }}</h3>
+                <div class="flex flex-col gap-2">
                   <span class="text-sm text-gray-600">{{ cert.subevent || 'Marathon' }}</span>
                   <button
                     v-if="cert.price === 0"
-                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                    class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
                     @click.stop="downloadCertificate(cert)"
                   >
                     Free Download
@@ -177,10 +177,10 @@
           </div>
         </div>
 
-        <!-- Pricing Sidebar -->
-        <div class="lg:col-span-1">
+        <!-- Pricing Sidebar (only show on Photos tab) -->
+        <div v-if="activeTab === 'photos'" class="lg:col-span-1">
           <PricingOptions
-            v-if="activeTab === 'photos' && athleteData.currency_pricing"
+            v-if="athleteData.currency_pricing"
             :pricing="currentPricing"
             :currency="eventData?.event?.currency || 'EUR'"
             @add-to-cart="handleAddToCart"
@@ -468,6 +468,19 @@ const singlePhotoPrice = computed(() => {
 // Get currency
 const currency = computed(() => eventData.value?.event?.currency || 'EUR')
 
+// Get current bib number from URL or athlete data
+const currentBibNumber = computed(() => {
+  // First check if bib number is in the URL
+  if (initialBibNumber) {
+    return initialBibNumber
+  }
+  // Otherwise check if we have athlete data with bib
+  if (athleteData.value?.bib) {
+    return athleteData.value.bib
+  }
+  return null
+})
+
 // Handle add to cart from PricingOptions (bundles)
 const handleAddToCart = (option: any) => {
   if (!actualEventPath || !option) return
@@ -477,7 +490,8 @@ const handleAddToCart = (option: any) => {
     name: option.name,
     price: option.price,
     currency: currency.value,
-    event: actualEventPath
+    event: actualEventPath,
+    bibNumber: currentBibNumber.value || undefined
   }
   
   cartStore.addItem(cartItem)
@@ -498,10 +512,15 @@ const handlePhotoAddToCart = (photo: Photo) => {
     price: singlePhotoPrice.value,
     currency: currency.value,
     event: actualEventPath,
-    photoId: photo.id
+    photoId: photo.id,
+    bibNumber: currentBibNumber.value || undefined
   }
   
-  cartStore.addItem(cartItem)
+  // Get All Event Photos option for comparison (to check if we should replace)
+  const allEventPhotosOption = currentPricing.value.find((item) => item.product === 'dl_eventcd')
+  
+  // Add the single photo - the store will check if total >= All Event Photos and replace
+  cartStore.addItem(cartItem, allEventPhotosOption)
 }
 
 const openPhotoModal = (photo: Photo) => {

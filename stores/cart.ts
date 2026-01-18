@@ -8,6 +8,7 @@ export interface CartItem {
   event: string // Event path for grouping
   photoId?: string // Only for single photos (dl_20x30)
   quantity?: number
+  bibNumber?: string // Bib number to navigate to event page with athlete photos
 }
 
 interface CartState {
@@ -44,7 +45,10 @@ export const useCartStore = defineStore('cart', {
         if (!grouped[item.event]) {
           grouped[item.event] = []
         }
-        grouped[item.event].push(item)
+        const eventGroup = grouped[item.event]
+        if (eventGroup) {
+          eventGroup.push(item)
+        }
       })
       return grouped
     },
@@ -78,7 +82,7 @@ export const useCartStore = defineStore('cart', {
   actions: {
     // Load cart from localStorage
     loadCart() {
-      if (process.client) {
+      if (import.meta.client) {
         try {
           const stored = localStorage.getItem(STORAGE_KEY)
           if (stored) {
@@ -93,7 +97,7 @@ export const useCartStore = defineStore('cart', {
 
     // Save cart to localStorage
     saveCart() {
-      if (process.client) {
+      if (import.meta.client) {
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(this.items))
         } catch (error) {
@@ -103,23 +107,39 @@ export const useCartStore = defineStore('cart', {
     },
 
     // Add item to cart with replacement logic
-    addItem(item: CartItem) {
+    // Replacement hierarchy: Single -> All -> Plus -> Pack
+    // Only one of All/Plus/Pack can exist (expensive one includes cheaper ones)
+    addItem(item: CartItem, allEventPhotosOption?: { product: string; price: number } | null) {
       // Get items for this event
       const eventItems = this.items.filter(i => i.event === item.event)
       
       // Handle replacement logic based on product type
       if (item.product === 'dl_megapack') {
-        // Photo Pack replaces Photos Plus and All Event Photos
+        // Photo Pack (most expensive) replaces Photos Plus, All Event Photos, and all single photos
         this.items = this.items.filter(i => 
-          !(i.event === item.event && ['dl_digsuperpack', 'dl_eventcd'].includes(i.product))
+          !(i.event === item.event && ['dl_digsuperpack', 'dl_eventcd', 'dl_20x30'].includes(i.product))
         )
       } else if (item.product === 'dl_digsuperpack') {
-        // Photos Plus replaces All Event Photos
+        // Photos Plus replaces All Event Photos and all single photos
+        // But if Photo Pack exists, don't add Photos Plus
+        const hasPhotoPack = eventItems.some(i => i.product === 'dl_megapack')
+        if (hasPhotoPack) {
+          // Photo Pack already includes Photos Plus, don't add
+          return
+        }
         this.items = this.items.filter(i => 
-          !(i.event === item.event && i.product === 'dl_eventcd')
+          !(i.event === item.event && ['dl_eventcd', 'dl_20x30'].includes(i.product))
         )
       } else if (item.product === 'dl_eventcd') {
         // All Event Photos replaces all single photos if total single photo price is higher
+        // But if Photos Plus or Photo Pack exists, don't add All Event Photos
+        const hasPhotoPack = eventItems.some(i => i.product === 'dl_megapack')
+        const hasPhotosPlus = eventItems.some(i => i.product === 'dl_digsuperpack')
+        if (hasPhotoPack || hasPhotosPlus) {
+          // Bundle already includes All Event Photos, don't add
+          return
+        }
+        
         const singlePhotos = eventItems.filter(i => i.product === 'dl_20x30')
         const singlePhotosTotal = singlePhotos.reduce((sum, i) => sum + (i.price * (i.quantity || 1)), 0)
         
@@ -133,28 +153,16 @@ export const useCartStore = defineStore('cart', {
           return
         }
       } else if (item.product === 'dl_20x30') {
-        // Single photo: check if total single photos price >= All Event Photos
-        const singlePhotos = eventItems.filter(i => i.product === 'dl_20x30')
-        const allEventPhotosItem = eventItems.find(i => i.product === 'dl_eventcd')
+        // Single photo: check replacement logic
         
-        const newSinglePhotosTotal = [...singlePhotos, item].reduce(
-          (sum, i) => sum + (i.price * (i.quantity || 1)), 
-          0
-        )
-        
-        if (allEventPhotosItem && newSinglePhotosTotal >= allEventPhotosItem.price) {
-          // Replace single photos with All Event Photos
-          this.items = this.items.filter(i => 
-            !(i.event === item.event && i.product === 'dl_20x30')
-          )
-          this.items.push(allEventPhotosItem)
-          this.saveCart()
+        // If Photo Pack or Photos Plus exists, don't add single photo (it's already included)
+        const hasPhotoPack = eventItems.some(i => i.product === 'dl_megapack')
+        const hasPhotosPlus = eventItems.some(i => i.product === 'dl_digsuperpack')
+        if (hasPhotoPack || hasPhotosPlus) {
           return
         }
-      }
-      
-      // Check if item already exists (for single photos with same photoId)
-      if (item.product === 'dl_20x30' && item.photoId) {
+        
+        // Check if this single photo already exists
         const existing = this.items.find(
           i => i.event === item.event && i.product === 'dl_20x30' && i.photoId === item.photoId
         )
@@ -162,10 +170,68 @@ export const useCartStore = defineStore('cart', {
           // Already in cart, don't add again
           return
         }
-      } else {
-        // For bundles, remove existing bundle of same type
+        
+        // Check if total single photos price >= All Event Photos
+        const singlePhotos = eventItems.filter(i => i.product === 'dl_20x30')
+        const existingAllEventPhotosItem = eventItems.find(i => i.product === 'dl_eventcd')
+        
+        // Get All Event Photos price from option passed in, or from existing cart item
+        let allEventPhotosPrice: number | null = null
+        
+        if (allEventPhotosOption) {
+          allEventPhotosPrice = allEventPhotosOption.price
+        } else if (existingAllEventPhotosItem) {
+          allEventPhotosPrice = existingAllEventPhotosItem.price
+        }
+        
+        // Calculate new total with this single photo added
+        const newSinglePhotosTotal = [...singlePhotos, item].reduce(
+          (sum, i) => sum + (i.price * (i.quantity || 1)), 
+          0
+        )
+        
+        // If we have All Event Photos price and total single photos >= it, replace with All Event Photos
+        if (allEventPhotosPrice !== null && newSinglePhotosTotal >= allEventPhotosPrice) {
+          // Replace all single photos with All Event Photos
+          this.items = this.items.filter(i => 
+            !(i.event === item.event && i.product === 'dl_20x30')
+          )
+          
+          // Create or update All Event Photos item
+          if (existingAllEventPhotosItem) {
+            // Update existing All Event Photos item (preserve its data, just update bibNumber if needed)
+            const index = this.items.findIndex(i => i.event === item.event && i.product === 'dl_eventcd')
+            if (index !== -1 && this.items[index]) {
+              this.items[index].bibNumber = item.bibNumber || this.items[index].bibNumber
+            }
+          } else {
+            // Need to create All Event Photos item - need price info
+            if (!allEventPhotosOption) {
+              // Can't create All Event Photos without price info, just add the single photo
+              this.items.push(item)
+              this.saveCart()
+              return
+            }
+            // Create new All Event Photos item
+            this.items.push({
+              product: 'dl_eventcd',
+              name: 'All Event Photos',
+              price: allEventPhotosPrice,
+              currency: item.currency,
+              event: item.event,
+              bibNumber: item.bibNumber
+            })
+          }
+          this.saveCart()
+          return
+        }
+      }
+      
+      // For bundles (All/Plus/Pack), remove existing bundle of same type or lower tier
+      if (['dl_eventcd', 'dl_digsuperpack', 'dl_megapack'].includes(item.product)) {
+        // Remove all photo bundles for this event (they're mutually exclusive)
         this.items = this.items.filter(
-          i => !(i.event === item.event && i.product === item.product)
+          i => !(i.event === item.event && ['dl_eventcd', 'dl_digsuperpack', 'dl_megapack'].includes(i.product))
         )
       }
       
