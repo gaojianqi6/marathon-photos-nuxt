@@ -32,26 +32,26 @@
             <div class="flex flex-col sm:flex-row gap-4 justify-center items-stretch sm:items-center">
               <NuxtLink
                 to="/"
-                class="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl font-semibold w-full sm:w-[200px]"
+                class="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl font-semibold w-full sm:w-[200px] whitespace-nowrap"
               >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                 </svg>
-                Go to Home
+                <span>Go to Home</span>
               </NuxtLink>
 
               <NuxtLink
                 to="/recent-events"
-                class="inline-flex items-center justify-center gap-2 bg-white border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-lg hover:border-blue-500 hover:text-blue-600 transition-all duration-200 shadow-md hover:shadow-lg font-semibold w-full sm:w-[200px]"
+                class="inline-flex items-center justify-center gap-2 bg-white border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-lg hover:border-blue-500 hover:text-blue-600 transition-all duration-200 shadow-md hover:shadow-lg font-semibold w-full sm:w-[200px] whitespace-nowrap"
               >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                Browse Events
+                <span>Browse Events</span>
               </NuxtLink>
             </div>
 
@@ -99,8 +99,22 @@ const props = defineProps<{
   }
 }>()
 
-// Set page title
+// Set page title and favicon
 useHead({
-  title: props.error?.statusCode === 404 ? '404 - Page Not Found' : 'Error - Marathon Photos'
+  title: props.error?.statusCode === 404 ? '404 - Page Not Found | Marathon Photos' : 'Error - Marathon Photos',
+  link: [
+    {
+      rel: 'icon',
+      type: 'image/png',
+      sizes: '32x32',
+      href: '/img/icons/favicon-32x32.png'
+    },
+    {
+      rel: 'icon',
+      type: 'image/png',
+      sizes: '16x16',
+      href: '/img/icons/favicon-16x16.png'
+    }
+  ]
 })
 </script>
