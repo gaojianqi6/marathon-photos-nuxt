@@ -479,19 +479,15 @@ const showNotification = (result: { success: boolean; replacedItems?: string[]; 
       toast.add({
         title: 'Already in Cart',
         description: photoId ? `${itemName} (Photo ID: ${photoId}) is already in your cart` : (result.message || `${itemName} is already in your cart`),
-        color: 'amber',
-        timeout: 3000,
-        icon: 'i-heroicons-exclamation-triangle',
-        progress: true
+        color: 'warning',
+        icon: 'i-heroicons-exclamation-triangle'
       })
     } else {
       toast.add({
         title: 'Error',
         description: photoId ? `Failed to add ${itemName} (Photo ID: ${photoId}) to cart` : (result.message || `Failed to add ${itemName} to cart`),
-        color: 'red',
-        timeout: 3000,
-        icon: 'i-heroicons-x-circle',
-        progress: true
+        color: 'error',
+        icon: 'i-heroicons-x-circle'
       })
     }
     return
@@ -506,10 +502,8 @@ const showNotification = (result: { success: boolean; replacedItems?: string[]; 
   toast.add({
     title: 'Item Added',
     description,
-    color: 'green',
-    timeout: 3000,
-    icon: 'i-heroicons-check-circle',
-    progress: true
+    color: 'success',
+    icon: 'i-heroicons-check-circle'
   })
 }
 
@@ -561,10 +555,8 @@ const handlePhotoAddToCart = (photo: Photo) => {
     toast.add({
       title: 'Already in Cart',
       description: `This photo (Photo ID: ${photo.id}) is already in your cart`,
-      color: 'amber',
-      timeout: 3000,
-      icon: 'i-heroicons-exclamation-triangle',
-      progress: true
+      color: 'warning',
+      icon: 'i-heroicons-exclamation-triangle'
     })
     return
   }

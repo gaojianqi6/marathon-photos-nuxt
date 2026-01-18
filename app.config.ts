@@ -1,10 +1,10 @@
 export default defineAppConfig({
-  ui: {
-    toaster: {
-      position: 'bottom-right' as const,
-      duration: 1000,
-      max: 5,
-      expand: true
-    }
+  // Global toast/toaster configuration
+  // These settings are used via UApp component's toaster prop
+  toaster: {
+    position: 'bottom-right' as const,
+    duration: 2000,
+    max: 5, // Maximum number of toasts
+    expand: true
   }
 })

@@ -1,5 +1,5 @@
 <template>
-  <UApp>
+  <UApp :toaster="toasterConfig">
     <NuxtLayout>
       <NuxtPage />
       <NuxtRouteAnnouncer />
@@ -8,6 +8,16 @@
 </template>
 
 <script setup lang="ts">
+const appConfig = useAppConfig()
+
+// Use toaster config from app.config.ts
+const toasterConfig = computed(() => appConfig.toaster || {
+  position: 'top-right' as const,
+  duration: 3000,
+  max: 5,
+  expand: true
+})
+  
 useHead({
   title: 'Marathon Photos Live | Gold Coast Marathon',
   link: [
