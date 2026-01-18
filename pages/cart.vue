@@ -154,6 +154,7 @@
 import type { CartItem } from '~/stores/cart'
 
 const cartStore = useCartStore()
+const toast = useToast()
 
 // Load cart on mount
 onMounted(() => {
@@ -211,8 +212,19 @@ const getEventLink = (event: string, items: CartItem[]): string => {
 
 // Handle checkout
 const handleCheckout = () => {
+  if (import.meta.server) return // Only run on client side
+  
   // TODO: Implement checkout functionality
   console.log('Checkout:', cartStore.items)
-  alert('Checkout functionality will be implemented soon!')
+  
+  // Show toast notification
+  if (toast) {
+    toast.add({
+      title: 'Checkout',
+      description: 'Checkout functionality will be implemented soon!',
+      color: 'info',
+      icon: 'i-heroicons-information-circle'
+    })
+  }
 }
 </script>

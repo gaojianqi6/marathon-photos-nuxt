@@ -75,21 +75,33 @@ export const useCartStore = defineStore('cart', {
       return hasBundle
     },
 
-    // Check if a product is already in cart
+    // Check if a specific product is already in cart
     isProductInCart: (state) => (event: string, product: string) => {
       const eventItems = state.items.filter(item => item.event === event)
       
-      // For bundles, check if any bundle exists (they're mutually exclusive)
-      if (['dl_eventcd', 'dl_digsuperpack', 'dl_megapack'].includes(product)) {
-        return eventItems.some(item => ['dl_eventcd', 'dl_digsuperpack', 'dl_megapack'].includes(item.product))
-      }
+      // Check for exact product match
+      return eventItems.some(item => item.product === product)
+    },
+    
+    // Get the specific product in cart for this event (returns product code or null)
+    getCartProduct: (state) => (event: string) => {
+      const eventItems = state.items.filter(item => item.event === event)
       
-      // For video, check if video exists
-      if (product === '$movie') {
-        return eventItems.some(item => item.product === '$movie')
-      }
+      // Check for bundles in order: Pack > Plus > All (most expensive first)
+      const photoPack = eventItems.find(item => item.product === 'dl_megapack')
+      if (photoPack) return 'dl_megapack'
       
-      return false
+      const photosPlus = eventItems.find(item => item.product === 'dl_digsuperpack')
+      if (photosPlus) return 'dl_digsuperpack'
+      
+      const allEventPhotos = eventItems.find(item => item.product === 'dl_eventcd')
+      if (allEventPhotos) return 'dl_eventcd'
+      
+      // Check for video
+      const video = eventItems.find(item => item.product === '$movie')
+      if (video) return '$movie'
+      
+      return null
     },
 
     // Get total price for a specific event
@@ -173,20 +185,26 @@ export const useCartStore = defineStore('cart', {
           return { success: false, alreadyInCart: true, message: 'Already included in a bundle' }
         }
         
-        const singlePhotos = eventItems.filter(i => i.product === 'dl_20x30')
-        const singlePhotosTotal = singlePhotos.reduce((sum, i) => sum + (i.price * (i.quantity || 1)), 0)
+        // Check if All Event Photos already exists
+        const existingAllEventPhotos = eventItems.find(i => i.product === 'dl_eventcd')
+        if (existingAllEventPhotos) {
+          return { success: false, alreadyInCart: true, message: 'All Event Photos is already in cart' }
+        }
         
-        if (singlePhotosTotal >= item.price) {
-          // Remove all single photos and add All Event Photos
-          if (singlePhotos.length > 0) {
+        // If adding directly (not replacing), always allow it
+        // Otherwise, check if single photos should be replaced
+        const singlePhotos = eventItems.filter(i => i.product === 'dl_20x30')
+        if (singlePhotos.length > 0) {
+          const singlePhotosTotal = singlePhotos.reduce((sum, i) => sum + (i.price * (i.quantity || 1)), 0)
+          
+          if (singlePhotosTotal >= item.price) {
+            // Remove all single photos and add All Event Photos
             replacedItems.push(`${singlePhotos.length} single photo(s)`)
+            this.items = this.items.filter(i => 
+              !(i.event === item.event && i.product === 'dl_20x30')
+            )
           }
-          this.items = this.items.filter(i => 
-            !(i.event === item.event && i.product === 'dl_20x30')
-          )
-        } else {
-          // Keep single photos, don't add All Event Photos
-          return { success: false, message: 'Single photos total is less than All Event Photos price' }
+          // If single photos total is less, still allow adding All Event Photos (user clicked button directly)
         }
       } else if (item.product === 'dl_20x30') {
         // Single photo: check replacement logic
