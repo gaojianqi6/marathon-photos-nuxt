@@ -117,6 +117,7 @@
 <script setup lang="ts">
 const props = defineProps<{
   eventPath: string
+  initialBib?: string | null
 }>()
 
 const emit = defineEmits<{
@@ -124,11 +125,21 @@ const emit = defineEmits<{
 }>()
 
 const searchMode = ref<'bib' | 'photo'>('bib')
-const bibNumber = ref('')
+const bibNumber = ref(props.initialBib || '')
 const uploadedFile = ref<File | null>(null)
 const fileInputRef = ref<HTMLInputElement | null>(null)
 const isLoading = ref(false)
 const errorMessage = ref('')
+
+// Expose method to search by bib number programmatically
+const searchByBibNumber = async (bib: string) => {
+  bibNumber.value = bib
+  await searchByBib()
+}
+
+defineExpose({
+  searchByBibNumber
+})
 
 const searchByBib = async () => {
   if (!bibNumber.value.trim()) {
@@ -163,8 +174,12 @@ const searchByBib = async () => {
       errorMessage.value = ''
     } else if (response && response.status === 'error') {
       errorMessage.value = response.reason || 'No photos found for this bib number'
+      // Still emit the response so parent can show "no photos" message
+      emit('photosFound', response)
     } else {
       errorMessage.value = 'No photos found for this bib number. Please check the bib number and try again.'
+      // Emit empty athlete response to show "no photos" message
+      emit('photosFound', { status: 'ok', athlete: { bib: bibNumber.value.trim(), first_name: '', surname: '', photos: { generic: [], autocam: [], additional: [], identified: [] } } })
     }
   } catch (error: any) {
     console.error('Search error:', error)

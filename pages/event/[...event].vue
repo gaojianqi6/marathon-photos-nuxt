@@ -22,13 +22,13 @@
 
     <!-- Search Area -->
     <section class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <EventSearch :event-path="eventPath" @photos-found="handlePhotosFound" />
+      <EventSearch ref="eventSearchRef" :event-path="actualEventPath" :initial-bib="initialBibNumber" @photos-found="handlePhotosFound" />
     </section>
 
     <!-- Search Results -->
     <div v-if="athleteData" class="container mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-      <!-- Congratulations Section -->
-      <div class="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl p-8 mb-8">
+      <!-- Congratulations Section (only show if photos found) -->
+      <div v-if="totalPhotos > 0" class="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl p-8 mb-8">
         <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
           <div>
             <h2 class="text-3xl font-bold text-gray-900 mb-2">
@@ -39,16 +39,31 @@
             </p>
           </div>
           <button
-            @click="handleBuyAllPhotos"
             class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl font-bold text-lg whitespace-nowrap"
+            @click="handleBuyAllPhotos"
           >
             Buy All Photos: {{ formatPrice(allPhotosPrice) }}
           </button>
         </div>
       </div>
 
-      <!-- Tabs -->
-      <div class="flex gap-2 border-b border-gray-200 mb-8">
+      <!-- No Photos Found Section -->
+      <div v-else class="bg-gradient-to-r from-gray-50 to-gray-100 border-2 border-gray-200 rounded-xl p-8 mb-8">
+        <div class="text-center">
+          <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <h2 class="text-3xl font-bold text-gray-900 mb-2">
+            We don't find photos
+          </h2>
+          <p class="text-xl text-gray-600">
+            Sorry, we couldn't find any photos for bib number {{ athleteData.bib }}. Please check the bib number and try again.
+          </p>
+        </div>
+      </div>
+
+      <!-- Tabs (only show if photos found) -->
+      <div v-if="totalPhotos > 0" class="flex gap-2 border-b border-gray-200 mb-8">
         <button
           :class="[
             'px-6 py-3 font-medium text-sm transition-colors border-b-2',
@@ -85,8 +100,8 @@
         </button>
       </div>
 
-      <!-- Content Area -->
-      <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <!-- Content Area (only show if photos found) -->
+      <div v-if="totalPhotos > 0" class="grid grid-cols-1 lg:grid-cols-4 gap-8">
         <!-- Photos / Certificates -->
         <div :class="['lg:col-span-3', activeTab === 'certificates' ? '' : '']">
           <!-- Photos Tab -->
@@ -116,8 +131,8 @@
                   <span class="text-sm text-gray-600">{{ cert.subevent || 'Marathon' }}</span>
                   <button
                     v-if="cert.price === 0"
-                    @click.stop="downloadCertificate(cert)"
                     class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                    @click.stop="downloadCertificate(cert)"
                   >
                     Free Download
                   </button>
@@ -265,6 +280,25 @@ try {
   // Already decoded or decode failed, use as is
 }
 
+// Extract bib number if the last segment is numeric
+const pathSegments = eventPath.split('/').filter(Boolean)
+const lastSegment = pathSegments[pathSegments.length - 1]
+const isBibNumber = /^\d+$/.test(lastSegment) // Check if last segment is numeric only
+
+let actualEventPath: string
+let initialBibNumber: string | null = null
+
+if (isBibNumber) {
+  // Last segment is a bib number, extract it
+  initialBibNumber = lastSegment
+  // Remove the bib number from the path
+  pathSegments.pop()
+  actualEventPath = pathSegments.join('/')
+} else {
+  actualEventPath = eventPath
+}
+
+const eventSearchRef = ref<InstanceType<typeof EventSearch> | null>(null)
 const athleteData = ref<AthleteData | null>(null)
 const eventData = ref<EventData | null>(null)
 const activeTab = ref<'photos' | 'certificates' | 'previousYear'>('photos')
@@ -364,10 +398,51 @@ const relatedEvents = computed(() => {
   }))
 })
 
-const handlePhotosFound = (data: any) => {
+const router = useRouter()
+
+const handlePhotosFound = async (data: any) => {
   if (data.status === 'ok' && data.athlete) {
-    athleteData.value = data.athlete
-    eventData.value = data
+    const bib = data.athlete.bib
+    // Calculate total photos count from response data
+    const photos = [
+      ...(data.athlete.photos?.identified || []),
+      ...(data.athlete.photos?.autocam || []),
+      ...(data.athlete.photos?.generic || []),
+      ...(data.athlete.photos?.additional || [])
+    ]
+    const photosCount = photos.length
+    
+    if (photosCount > 0) {
+      // Photos found - set data and update URL with bib number
+      athleteData.value = data.athlete
+      eventData.value = data
+      
+      if (bib) {
+        const newPath = `/event/${encodeURIComponent(actualEventPath)}/${bib}`
+        
+        // Only update URL if it's different from current URL
+        if (route.path !== newPath) {
+          await router.replace(newPath)
+        }
+      }
+    } else {
+      // No photos found - clear athlete data and remove bib from URL
+      athleteData.value = null
+      eventData.value = data // Keep event data if available
+      
+      // Update URL to remove bib number if present
+      const currentPath = route.path
+      if (currentPath.match(/\/\d+$/)) {
+        // If URL ends with a number (bib), remove it
+        const pathWithoutBib = currentPath.replace(/\/\d+$/, '')
+        if (pathWithoutBib !== currentPath) {
+          await router.replace(pathWithoutBib)
+        }
+      }
+    }
+  } else if (data.status === 'error') {
+    // Error response - clear athlete data
+    athleteData.value = null
   }
 }
 
@@ -445,7 +520,12 @@ const formatPrice = (price: number, currency: string = 'EUR'): string => {
 
 // Load event data on mount if available
 onMounted(async () => {
-  // You can optionally fetch event info here if needed
-  // For now, it will be loaded when photos are found
+  // If there's a bib number in the URL, automatically search for photos
+  // But skip if we already have data for this bib (to prevent duplicate requests)
+  if (initialBibNumber && eventSearchRef.value && athleteData.value?.bib !== initialBibNumber) {
+    // Set the bib number in the search component and trigger search
+    await nextTick()
+    eventSearchRef.value.searchByBibNumber(initialBibNumber)
+  }
 })
 </script>
